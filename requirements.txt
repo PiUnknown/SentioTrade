@@ -1,0 +1,7 @@
+praw
+fastapi
+uvicorn
+transformers
+torch
+python-dotenv
+numpy

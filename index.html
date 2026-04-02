@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SentioTrade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080c10;
+      --surface: #0e1318;
+      --border: #1a2330;
+      --accent-green: #00ff88;
+      --accent-red: #ff3d5a;
+      --accent-yellow: #ffd066;
+      --accent-blue: #4d9fff;
+      --text: #c8d8e8;
+      --text-dim: #4a6070;
+      --text-bright: #eaf2ff;
+      --mono: 'Space Mono', monospace;
+      --display: 'Syne', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 64px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 2rem;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+    }
+
+    .logo span {
+      color: var(--accent-green);
+    }
+
+    .tagline {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .status-dot {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* SEARCH */
+    .search-section {
+      margin-bottom: 48px;
+    }
+
+    .search-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .ticker-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 18px 24px;
+      outline: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s;
+    }
+
+    .ticker-input::placeholder {
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+
+    .ticker-input:focus {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 1px var(--accent-green), inset 0 0 20px rgba(0,255,136,0.03);
+    }
+
+    .analyze-btn {
+      background: var(--accent-green);
+      color: #000;
+      border: none;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 18px 32px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .analyze-btn:hover {
+      background: #fff;
+      transform: translateY(-1px);
+    }
+
+    .analyze-btn:active {
+      transform: translateY(0);
+    }
+
+    .analyze-btn:disabled {
+      background: var(--border);
+      color: var(--text-dim);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* QUICK TICKERS */
+    .quick-tickers {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .quick-ticker {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quick-ticker:hover {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    /* LOADING */
+    .loading {
+      text-align: center;
+      padding: 60px;
+    }
+
+    .loading-bar {
+      width: 200px;
+      height: 2px;
+      background: var(--border);
+      margin: 0 auto 20px;
+      overflow: hidden;
+    }
+
+    .loading-bar::after {
+      content: '';
+      display: block;
+      height: 100%;
+      width: 40%;
+      background: var(--accent-green);
+      animation: slide 1s infinite linear;
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    @keyframes slide {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(350%); }
+    }
+
+    .loading-text {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* RESULTS */
+    .results {
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .result-ticker {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 3rem;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+    }
+
+    .result-timestamp {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+
+    /* MAIN VERDICT */
+    .verdict-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 32px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .verdict-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .verdict-value {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 2.5rem;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+    }
+
+    .verdict-value.positive { color: var(--accent-green); text-shadow: 0 0 20px rgba(0,255,136,0.3); }
+    .verdict-value.negative { color: var(--accent-red); text-shadow: 0 0 20px rgba(255,61,90,0.3); }
+    .verdict-value.neutral { color: var(--accent-yellow); text-shadow: 0 0 20px rgba(255,208,102,0.3); }
+
+    .verdict-icon {
+      font-size: 3.5rem;
+      line-height: 1;
+    }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 20px;
+    }
+
+    .stat-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 1.8rem;
+      color: var(--text-bright);
+    }
+
+    .stat-value.green { color: var(--accent-green); }
+    .stat-value.red { color: var(--accent-red); }
+    .stat-value.yellow { color: var(--accent-yellow); }
+
+    /* BAR CHART */
+    .bar-section {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .bar-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .bar-name {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      width: 70px;
+      flex-shrink: 0;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 0%;
+    }
+
+    .bar-fill.green { background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
+    .bar-fill.red { background: var(--accent-red); box-shadow: 0 0 6px var(--accent-red); }
+    .bar-fill.yellow { background: var(--accent-yellow); box-shadow: 0 0 6px var(--accent-yellow); }
+
+    .bar-count {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      width: 24px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* CONFIDENCE */
+    .confidence-section {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 24px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .conf-item {}
+    .conf-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .conf-value {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 1.4rem;
+    }
+
+    /* FOOTER NOTE */
+    .footer-note {
+      border-left: 2px solid var(--border);
+      padding: 12px 16px;
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+      line-height: 1.6;
+    }
+
+    /* ERROR */
+    .error-box {
+      border: 1px solid var(--accent-red);
+      background: rgba(255,61,90,0.05);
+      padding: 20px 24px;
+      font-size: 0.75rem;
+      color: var(--accent-red);
+      letter-spacing: 0.05em;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .confidence-section { grid-template-columns: 1fr; }
+      .result-ticker { font-size: 2rem; }
+      .verdict-value { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div>
+      <div class="logo">Sentio<span>Trade</span></div>
+      <div class="tagline">Social Sentiment Intelligence</div>
+    </div>
+    <div class="status-dot">
+      <div class="dot"></div>
+      LIVE
+    </div>
+  </header>
+
+  <div class="search-section">
+    <span class="search-label">Enter Ticker Symbol</span>
+    <div class="search-row">
+      <input
+        class="ticker-input"
+        id="tickerInput"
+        type="text"
+        placeholder="TSLA"
+        maxlength="6"
+        autocomplete="off"
+      />
+      <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
+        Analyze →
+      </button>
+    </div>
+    <div class="quick-tickers">
+      <span style="font-size:0.6rem;color:var(--text-dim);letter-spacing:0.1em;align-self:center;">QUICK:</span>
+      <button class="quick-ticker" onclick="quickSearch('TSLA')">TSLA</button>
+      <button class="quick-ticker" onclick="quickSearch('AAPL')">AAPL</button>
+      <button class="quick-ticker" onclick="quickSearch('NVDA')">NVDA</button>
+      <button class="quick-ticker" onclick="quickSearch('GME')">GME</button>
+      <button class="quick-ticker" onclick="quickSearch('MSFT')">MSFT</button>
+      <button class="quick-ticker" onclick="quickSearch('AMD')">AMD</button>
+    </div>
+  </div>
+
+  <div id="output"></div>
+
+</div>
+
+<script>
+  const input = document.getElementById('tickerInput');
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') analyze(); });
+
+  function quickSearch(ticker) {
+    input.value = ticker;
+    analyze();
+  }
+
+  function getVerdict(sentiment) {
+    if (sentiment === 'positive') return { icon: '↑', cls: 'positive' };
+    if (sentiment === 'negative') return { icon: '↓', cls: 'negative' };
+    return { icon: '→', cls: 'neutral' };
+  }
+
+  function getBarWidth(count, total) {
+    if (total === 0) return 0;
+    return Math.round((count / total) * 100);
+  }
+
+  async function analyze() {
+    const ticker = input.value.trim().toUpperCase();
+    if (!ticker) return;
+
+    const btn = document.getElementById('analyzeBtn');
+    const output = document.getElementById('output');
+    btn.disabled = true;
+
+    output.innerHTML = `
+      <div class="loading">
+        <div class="loading-bar"></div>
+        <div class="loading-text">Scanning Reddit · Running FinBERT · Aggregating signals</div>
+      </div>
+    `;
+
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/sentiment/${ticker}?limit=50`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        output.innerHTML = `<div class="error-box">⚠ ${data.detail || 'No data found for ' + ticker}</div>`;
+        return;
+      }
+
+      const s = data.summary;
+      const verdict = getVerdict(s.overall_sentiment);
+      const total = s.post_count;
+      const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+
+      output.innerHTML = `
+        <div class="results">
+          <div class="result-header">
+            <div class="result-ticker">$${data.ticker}</div>
+            <div class="result-timestamp">ANALYZED AT ${now} · ${total} POSTS</div>
+          </div>
+
+          <div class="verdict-card">
+            <div>
+              <div class="verdict-label">Overall Sentiment</div>
+              <div class="verdict-value ${verdict.cls}">${s.overall_sentiment.toUpperCase()}</div>
+            </div>
+            <div class="verdict-icon">${verdict.icon}</div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Bullish Posts</div>
+              <div class="stat-value green">${s.positive_posts}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Bearish Posts</div>
+              <div class="stat-value red">${s.negative_posts}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Neutral Posts</div>
+              <div class="stat-value yellow">${s.neutral_posts}</div>
+            </div>
+          </div>
+
+          <div class="bar-section">
+            <div class="bar-label">Sentiment Distribution</div>
+            <div class="bar-row">
+              <div class="bar-name" style="color:var(--accent-green)">Bullish</div>
+              <div class="bar-track">
+                <div class="bar-fill green" id="bar-pos" style="width:0%"></div>
+              </div>
+              <div class="bar-count">${s.positive_posts}</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name" style="color:var(--accent-red)">Bearish</div>
+              <div class="bar-track">
+                <div class="bar-fill red" id="bar-neg" style="width:0%"></div>
+              </div>
+              <div class="bar-count">${s.negative_posts}</div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-name" style="color:var(--accent-yellow)">Neutral</div>
+              <div class="bar-track">
+                <div class="bar-fill yellow" id="bar-neu" style="width:0%"></div>
+              </div>
+              <div class="bar-count">${s.neutral_posts}</div>
+            </div>
+          </div>
+
+          <div class="confidence-section">
+            <div class="conf-item">
+              <div class="conf-label">Avg Bullish Confidence</div>
+              <div class="conf-value" style="color:var(--accent-green)">
+                ${s.avg_positive_confidence ? (s.avg_positive_confidence * 100).toFixed(1) + '%' : '—'}
+              </div>
+            </div>
+            <div class="conf-item">
+              <div class="conf-label">Avg Bearish Confidence</div>
+              <div class="conf-value" style="color:var(--accent-red)">
+                ${s.avg_negative_confidence ? (s.avg_negative_confidence * 100).toFixed(1) + '%' : '—'}
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-note">
+            ⚠ SentioTrade reflects current Reddit sentiment via FinBERT NLP analysis.
+            This is not financial advice. Sentiment signals are directional indicators only —
+            always conduct independent research before making investment decisions.
+          </div>
+        </div>
+      `;
+
+      // Animate bars after render
+      setTimeout(() => {
+        document.getElementById('bar-pos').style.width = getBarWidth(s.positive_posts, total) + '%';
+        document.getElementById('bar-neg').style.width = getBarWidth(s.negative_posts, total) + '%';
+        document.getElementById('bar-neu').style.width = getBarWidth(s.neutral_posts, total) + '%';
+      }, 50);
+
+    } catch (err) {
+      output.innerHTML = `<div class="error-box">⚠ Could not connect to SentioTrade API. Make sure the server is running on port 8000.</div>`;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
